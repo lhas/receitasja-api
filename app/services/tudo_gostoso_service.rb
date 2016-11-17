@@ -4,8 +4,8 @@ require 'nokogiri'
 class TudoGostosoService
   attr_reader :website, :current_page
 
-  def initialize(website)
-    @website      = website
+  def initialize
+    @website      = 'http://www.tudogostoso.com.br'
     @current_page = 39
   end
 
@@ -17,31 +17,40 @@ class TudoGostosoService
     Nokogiri::XML(string).errors.empty?
   end
 
-  def fake_path
-    '/receita/' + @current_page.to_s + '-a.html'
+  def final_path
+    path = @website + '/receita/' + @current_page.to_s + '-a.html'
+
+    path
   end
 
-  def crawl
-    current_url = @website + fake_path
-    
-    Wombat.crawl do
-      base_url current_url
-      path ''
+  def crawl(path = nil)
+    path = path.nil? ? final_path : path
 
-      headline xpath: "//h1"
-      subheading css: "p.alt-lead"
-
-      what_is({ css: ".one-fourth h4" }, :list)
-
-      links do
-        explore xpath: '/html/body/header/div/div/nav[1]/a[4]' do |e|
-          e.gsub(/Explore/, "Love")
-        end
-
-        features css: '.nav-item-opensource'
-        business css: '.nav-item-business'
-      end
+    Wombat.configure do |config|
+      config.set_user_agent "Wombat"
     end
+
+    content = Wombat.crawl do
+      base_url path
+
+      breadcrumb 'css=span[typeof="v:Breadcrumb"]', :iterator do
+        link 'css=a'
+      end
+
+      title css: 'h1[itemprop="name"]'
+      stars css: 'span[itemprop="ratingValue"]'
+
+      time_to_cook xpath: "//time[@itemprop = \"totalTime\"]/@datetime"
+      recipe_yield xpath: "//data[@itemprop = \"recipeYield\"]/@value"
+
+      favorites css: "div.data.clearfix.gray-box .like.block .label"
+      
+      ingredients "css=.ingredients-box li", :list
+
+      directions "css=.directions-box .instructions li", :list
+    end
+
+    content
   end
 
 end

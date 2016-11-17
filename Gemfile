@@ -29,6 +29,7 @@ group :development, :test do
   gem 'byebug', platform: :mri
   gem 'rspec-rails', '~> 3.4'
   gem 'guard-rspec'
+  gem 'simplecov'
 end
 
 group :development do

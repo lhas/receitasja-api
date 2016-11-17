@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe TudoGostosoService do
   before do
-    @service = TudoGostosoService.new('http://www.tudogostoso.com.br')
+    @service = TudoGostosoService.new
   end
 
   context '.initialize' do
@@ -39,15 +39,52 @@ RSpec.describe TudoGostosoService do
 
   end
 
-  context '.fake_path' do
+  context '.final_path' do
     context 'with the current page' do
-      it { expect(@service.fake_path).to eq('/receita/39-a.html') }
+      it { expect(@service.final_path).to eq('http://www.tudogostoso.com.br/receita/39-a.html') }
     end
   end
 
-  context '.crawl' do
-    context 'the url from current page' do
-      it { expect(@service.crawl).to be_a(Hash) }
+  describe '.crawl' do
+
+    before do
+      @crawl = @service.crawl
+    end
+
+    it 'should a valid hash' do
+      expect(@crawl).to be_a(Hash)
+    end
+
+    it 'should return the correct recipe breadcrumb' do
+      expect(@crawl['breadcrumb'][1]['link']).to eq('Saladas, molhos e acompanhamentos')
+    end
+
+    it 'should return the correct recipe title' do
+      expect(@crawl['title']).to eq('Molho de tomate')
+    end
+
+    it 'should return the correct recipe stars' do
+      expect(@crawl['stars']).to eq('4')
+    end
+
+    it 'should return the correct recipe time to cook' do
+      expect(@crawl['time_to_cook']).to eq('PT50M')
+    end
+
+    it 'should return the correct recipe yield' do
+      expect(@crawl['recipe_yield']).to eq('4')
+    end
+
+    it 'should return the correct recipe favorites' do
+      expect(@crawl['favorites']).to eq("17.459\nFavoritos")
+    end
+
+    it 'should return the correct recipe ingredient' do
+      expect(@crawl['ingredients'][0]).to eq("2 kg de tomate maduro (débora ou italiano) cortado ao meio,sem semente")
+    end
+
+    it 'should return the correct recipe directions' do
+      expect(@crawl['directions'][0]).to eq("Numa panela, coloque 2 kg de tomate maduro sem sementes e deixe até amolecer")
     end
   end
 
