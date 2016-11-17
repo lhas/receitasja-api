@@ -86,6 +86,23 @@ RSpec.describe TudoGostosoService do
     it 'should return the correct recipe directions' do
       expect(@crawl['directions'][0]).to eq("Numa panela, coloque 2 kg de tomate maduro sem sementes e deixe até amolecer")
     end
+
+    context 'multiple recipes' do
+
+      before do
+        @current_page_crawl = @service.crawl
+        @service.next_page
+        @next_page_crawl = @service.crawl
+      end
+
+      it 'should still return the first correct recipe' do
+        expect(@current_page_crawl['title']).to eq('Molho de tomate')
+      end
+
+      it 'should return the second recipe' do
+        expect(@next_page_crawl['title']).to eq('Molho de Hortelã ( delicioso com carneiro)')
+      end
+    end
   end
 
 end
